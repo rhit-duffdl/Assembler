@@ -2,3 +2,4 @@ add $v0, $sv0, $v0
 subtract $fa0, $fa1, $fa0
 store $zero, $v0
 set $v0, 2
+set $sv0, 30
