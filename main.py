@@ -43,7 +43,7 @@ def main(filename):
     print(f'V-Types: {v_type_inst}')
     a_type_translated = []
     for instr in a_type_inst:
-        a_type_translated.append([x if x not in a_type or a_type_dict.keys() else a_type_dict[x] for x in instr])
+        a_type_translated.append([x if x not in a_type or x not in a_type_dict.keys() else a_type_dict[x] for x in instr])
     print(a_type_translated)
 
 
