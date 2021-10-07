@@ -15,7 +15,23 @@ a_type_dict = {
     "jump": "A",
     "jumpandlink": "B",
     "load": "C",
-    "store": "D"
+    "store": "D",
+    "zero": "0",
+    "ra": "1",
+    "stack": "2",
+    "global": "3",
+    "frame": "4",
+    "k0": "5",
+    "a0": "6",
+    "fa0": "7",
+    "fa1": "8",
+    "fr0": "9",
+    "fr1": "A",
+    "v0": "B",
+    "v1": "C",
+    "sv0": "D",
+    "sv1": "E",
+    "sv2": "F"
 }
 
 v_type_dict = {
@@ -43,7 +59,7 @@ def main(filename):
     print(f'V-Types: {v_type_inst}')
     a_type_translated = []
     for instr in a_type_inst:
-        a_type_translated.append([x if x not in a_type or x not in a_type_dict.keys() else a_type_dict[x] for x in instr])
+        a_type_translated.append([x if x not in a_type and x not in a_type_dict.keys() else a_type_dict[x] for x in instr])
     print(a_type_translated)
 
 
