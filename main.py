@@ -80,8 +80,8 @@ def main(filename):
         if instr[0] == "store":
             converted.append(converted[2])
             converted[2] = "0"
-
-    print(f"A-Types: {['0x' + ''.join(x) for x in a_type_translated]}")
+    a_type_translated = ['0x' + ''.join(x) for x in a_type_translated]
+    print(f"Machine A-Types: {a_type_translated}")
     v_type_translated = []
     for instr in v_type_inst:
         hex_string = str(hex(int(instr[2]))).replace("x", "").replace("0", "")
@@ -93,7 +93,8 @@ def main(filename):
             print(f"ERROR: This is not length 1 or 2 in hex... :{hex_string}")
 
         v_type_translated.append(f"0x7{a_type_dict[instr[1]]}{hex_string.upper()}")
-    print(f"V-Types: {[''.join(x) for x in v_type_translated]}")
+    v_types_translated = [''.join(x) for x in v_type_translated]
+    print(f"Machine V-Types: {v_types_translated}")
     file.close()
 
 
