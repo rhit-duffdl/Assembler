@@ -62,6 +62,19 @@ def convert_a_type(instr):
     if instr[0] == "store":
         converted.append(converted[2])
         converted[2] = "0"
+        return '0x' + ''.join(converted)
+    # figure out jump, jumpandlink
+    elif instr[0] == "jump":
+        print(f"{instr=}")
+        converted.extend(["0", converted[1]])
+        converted[1] = "0"
+        return '0x' + ''.join(converted)
+    elif instr[0] == "jumpandlink":
+    # converted.extend(["0", converted[1]])
+    # converted[1] = "0"
+    # return '0x' + ''.join(converted)
+    # What are we doing here
+        ...
     return '0x' + ''.join(converted)
 
 
