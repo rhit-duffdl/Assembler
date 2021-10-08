@@ -2,6 +2,8 @@ a_type = ["add", "and", "divide", "greaterthan", "lessthan", "or", "multiply", "
           "jumpandlink", "load", "store"]
 v_type = ["set"]
 
+pseudo = ["addval", "andval", "branchnoteq", "copy", "divideval", "equalto", "equaltoval", "greaterthanval",
+          "lessthanval", "loadatval", "orval", "multiplyval", "storeatval", "subtractval"]
 a_type_dict = {
     "add": "0",
     "and": "1",
@@ -55,46 +57,79 @@ v_type_dict = {
 }
 
 
+def convert_a_type(instr):
+    converted = [x if x not in a_type and x not in a_type_dict.keys() else a_type_dict[x] for x in instr]
+    if instr[0] == "store":
+        converted.append(converted[2])
+        converted[2] = "0"
+    return '0x' + ''.join(converted)
+
+
+def convert_v_type(instr):
+    hex_string = str(hex(int(instr[2]))).replace("x", "").replace("0", "")
+    if len(hex_string) == 2:
+        pass
+    elif len(hex_string) == 1:
+        hex_string = "0" + hex_string
+    else:
+        print(f"ERROR: This is not length 1 or 2 in hex... :{hex_string}")
+    return f"0x7{a_type_dict[instr[1]]}{hex_string.upper()}"
+
+
+def convert_pseudo():
+    ...
+
+
 def main(filename):
     file = open(filename, "r")
     text = file.read()
     instructions = text.split("\n")
     a_type_inst = []
     v_type_inst = []
+    all_translated = []
+
     for inst in instructions:
         inst = inst.replace(" ", "")
         if inst.split("$")[0] in a_type:
             inst = inst.replace(",", "")
             a_type_inst.append(inst.split("$"))
+            all_translated.append(convert_a_type(inst.split("$")))
         elif inst.split("$")[0] in v_type:
             inst = inst.replace(",", "$")
             v_type_inst.append(inst.split("$"))
+            all_translated.append(convert_v_type(inst.split("$")))
+        elif inst.split("$")[0] in pseudo:
+            pass
         else:
-            print(f"ERROR: Type cannot be identified for instruction: {inst}")
+            print(f"ERROR: Type cannot be identified for instruction: {inst.replace('$', ' $')}")
     print(f'A-Types: {a_type_inst}')
     print(f'V-Types: {v_type_inst}')
-    a_type_translated = []
-    for i, instr in enumerate(a_type_inst):
-        converted = [x if x not in a_type and x not in a_type_dict.keys() else a_type_dict[x] for x in instr]
-        a_type_translated.append(converted)
-        if instr[0] == "store":
-            converted.append(converted[2])
-            converted[2] = "0"
-    a_type_translated = ['0x' + ''.join(x) for x in a_type_translated]
-    print(f"Machine A-Types: {a_type_translated}")
-    v_type_translated = []
-    for instr in v_type_inst:
-        hex_string = str(hex(int(instr[2]))).replace("x", "").replace("0", "")
-        if len(hex_string) == 2:
-            pass
-        elif len(hex_string) == 1:
-            hex_string = "0" + hex_string
-        else:
-            print(f"ERROR: This is not length 1 or 2 in hex... :{hex_string}")
+    # a_type_translated = []
+    #
+    # for i, instr in enumerate(a_type_inst):
+    #     converted = [x if x not in a_type and x not in a_type_dict.keys() else a_type_dict[x] for x in instr]
+    #     a_type_translated.append(converted)
+    #     if instr[0] == "store":
+    #         converted.append(converted[2])
+    #         converted[2] = "0"
+    # a_type_translated = ['0x' + ''.join(x) for x in a_type_translated]
+    # print(f"Machine A-Types: {a_type_translated}")
 
-        v_type_translated.append(f"0x7{a_type_dict[instr[1]]}{hex_string.upper()}")
-    v_types_translated = [''.join(x) for x in v_type_translated]
-    print(f"Machine V-Types: {v_types_translated}")
+    # v_type_translated = []
+    # for instr in v_type_inst:
+    #     hex_string = str(hex(int(instr[2]))).replace("x", "").replace("0", "")
+    #     if len(hex_string) == 2:
+    #         pass
+    #     elif len(hex_string) == 1:
+    #         hex_string = "0" + hex_string
+    #     else:
+    #         print(f"ERROR: This is not length 1 or 2 in hex... :{hex_string}")
+    #     v_type_translated.append(f"0x7{a_type_dict[instr[1]]}{hex_string.upper()}")
+    # v_types_translated = [''.join(x) for x in v_type_translated]
+    # print(f"Machine V-Types: {v_types_translated}")
+
+    print(f"Machine ALL: {all_translated}")
+
     file.close()
 
 
