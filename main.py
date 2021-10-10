@@ -206,7 +206,7 @@ def main(filename_read, filename_write):
             print(f"ERROR: Type cannot be identified for instruction: {inst.replace('$', ' $')}")
 
     print(f"Machine ALL: {all_translated}")
-    print(len(all_translated))
+    print(f"Number of instructions: {len(all_translated)}")
     for inst in all_translated:
         print(inst)
 
