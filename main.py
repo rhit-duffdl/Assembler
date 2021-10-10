@@ -177,13 +177,14 @@ def convert_pseudo(instr):
     return ["something went wrong", "something went wrong"]
 
 
-def main(filename):
-    file = open(filename, "r")
+def main(filename_read, filename_write):
+    file = open(filename_read, "r")
     text = file.read()
     instructions = [inst for inst in text.split("\n") if inst != ""]
     a_type_inst = []
     v_type_inst = []
     all_translated = []
+    file.close()
 
     for inst in instructions:
         if "jumpandlinkval" not in inst and "jumpval" not in inst:
@@ -205,11 +206,15 @@ def main(filename):
             print(f"ERROR: Type cannot be identified for instruction: {inst.replace('$', ' $')}")
 
     print(f"Machine ALL: {all_translated}")
+    print(len(all_translated))
     for inst in all_translated:
         print(inst)
 
-    file.close()
-
+    file = open(filename_write, "w")
+    for instr in all_translated[0:len(all_translated)-1]:
+        file.write(instr)
+        file.write("\n")
+    file.write(all_translated[-1])
 
 if __name__ == '__main__':
-    main("lilak.txt")
+    main("lilak.txt", "translated.txt")
