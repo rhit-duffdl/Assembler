@@ -1,9 +1,9 @@
 a_type = ["add", "and", "divide", "greaterthan", "lessthan", "or", "multiply", "subtract", "brancheq", "jump",
-          "jumpandlink", "load", "store"]
+          "jumpandlink", "load", "store", "equalto"]
 v_type = ["set"]
 
-pseudo = ["addval", "andval", "branchnoteq", "copy", "divideval", "equalto", "equaltoval", "greaterthanval",
-          "lessthanval", "loadatval", "orval", "multiplyval", "storeatval", "subtractval"]
+pseudo = ["addval", "andval", "branchnoteq", "copy", "divideval", "equaltoval", "greaterthanval",
+          "lessthanval", "loadatval", "loadaddr", "orval", "multiplyval", "storeatval", "subtractval", "jumpval"]
 a_type_dict = {
     "add": "0",
     "and": "1",
@@ -18,6 +18,7 @@ a_type_dict = {
     "jumpandlink": "B",
     "load": "C",
     "store": "D",
+    "equalto": "E",
     "zero": "0",
     "ra": "1",
     "stack": "2",
@@ -63,23 +64,26 @@ def convert_a_type(instr):
         converted.append(converted[2])
         converted[2] = "0"
         return '0x' + ''.join(converted)
-    # figure out jump, jumpandlink
     elif instr[0] == "jump":
-        print(f"{instr=}")
         converted.extend(["0", converted[1]])
         converted[1] = "0"
         return '0x' + ''.join(converted)
     elif instr[0] == "jumpandlink":
-    # converted.extend(["0", converted[1]])
-    # converted[1] = "0"
-    # return '0x' + ''.join(converted)
-    # What are we doing here
-        ...
+        converted.extend(["0", converted[1]])
+        converted[1] = "0"
+        return '0x' + ''.join(converted)
+        # What are we doing here
+    elif instr[0] == "load":
+        return '0x' + ''.join(converted) + "0"
     return '0x' + ''.join(converted)
 
 
 def convert_v_type(instr):
-    hex_string = str(hex(int(instr[2]))).replace("x", "").replace("0", "")
+    if instr[2] != "0" and instr[2] != 0:
+        hex_string = str(hex(int(instr[2]))).replace("x", "").replace("0", "")
+    else:
+        instr[2] = "0"
+        hex_string = "0"
     if len(hex_string) == 2:
         pass
     elif len(hex_string) == 1:
@@ -89,20 +93,104 @@ def convert_v_type(instr):
     return f"0x7{a_type_dict[instr[1]]}{hex_string.upper()}"
 
 
-def convert_pseudo():
-    ...
+def convert_pseudo(instr):
+    set = []
+    if len(instr) > 2:
+        temp = instr[1].split(",")[0]
+        instr.append(instr[2])
+        instr[2] = instr[1].split(",")[1]
+        instr[1] = temp
+        set = ["set", "a0", instr[2]]
+
+    if instr[0] == "addval":
+        add = ["add", instr[1], "a0", instr[3]]
+        return [convert_v_type(set), convert_a_type(add)]
+    elif instr[0] == "subtractval":
+        sub = ["subtract", instr[1], "a0", instr[3]]
+        return [convert_v_type(set), convert_a_type(sub)]
+    elif instr[0] == "multiplyval":
+        mult = ["multiply", instr[1], "a0", instr[3]]
+        return [convert_v_type(set), convert_a_type(mult)]
+    elif instr[0] == "divideval":
+        div = ["divide", instr[1], "a0", instr[3]]
+        return [convert_v_type(set), convert_a_type(div)]
+    elif instr[0] == "orval":
+        or_ = ["or", instr[1], "a0", instr[3]]
+        return [convert_v_type(set), convert_a_type(or_)]
+    elif instr[0] == "andval":
+        and_ = ["and", instr[1], "a0", instr[3]]
+        return [convert_v_type(set), convert_a_type(and_)]
+    elif instr[0] == "lessthanval":
+        lessthan = ["lessthan", instr[1], "a0", instr[3]]
+        return [convert_v_type(set), convert_a_type(lessthan)]
+    elif instr[0] == "greaterthanval":
+        greaterthan = ["greaterthan", instr[1], "a0", instr[3]]
+        return [convert_v_type(set), convert_a_type(greaterthan)]
+    elif instr[0] == "equaltoval":
+        equalto = ["equalto", instr[1], "a0", instr[3]]
+        return [convert_v_type(set), convert_a_type(equalto)]
+    elif instr[0] == "storeatval":
+        instr.append(instr[1].split(",")[1])
+        instr[1] = instr[1].split(",")[0]
+        set = ["set", "a0", instr[2]]
+        store = ["store", instr[1], "a0"]
+        return [convert_v_type(set), convert_a_type(store)]
+    elif instr[0] == "loadatval":
+        instr.append(instr[1].split(",")[1])
+        instr[1] = instr[1].split(",")[0]
+        set = ["set", "a0", instr[2]]
+        load = ["load", instr[1], "a0"]
+        return [convert_v_type(set), convert_a_type(load)]
+    elif instr[0] == "copy":
+        add = ["add", instr[1], "zero", instr[3]]
+        return [convert_a_type(add)]
+    elif instr[0] == "branchnoteq":
+        instr[2] = instr[3].split(",")[0]
+        instr[3] = instr[3].split(",")[1]
+        set[2] = instr[3]
+        eqto = ["equalto", instr[1], instr[2], instr[1]]
+        brancheq = ["brancheq", instr[1], "zero", "a0"]
+        return [convert_v_type(set), convert_a_type(eqto), convert_a_type(brancheq)]
+    elif instr[0] == "loadaddr":
+        immediate_length = 16
+        temp = instr[1].split(",")
+        instr = [instr[0], temp[0], temp[1]]
+        num = instr[2]
+        binnum = bin(int(num)).replace("0b", "")
+        if len(binnum) < immediate_length:
+            binnum = "0" * (immediate_length - len(binnum)) + binnum
+        set1_num = binnum[0:int(immediate_length / 2)]
+        set2_num = binnum[int(immediate_length / 2):immediate_length]
+        set1 = ["set", instr[1], int(set1_num, 2)]
+        set2 = ["set", "a0", int(set2_num, 2)]
+        and_ = ["and", instr[1], "a0", instr[1]]
+        return [convert_v_type(set1), convert_v_type(set2), convert_a_type(and_)]
+    elif instr[0] == "jumpval":
+        set = ["set", "a0", instr[1]]
+        jumpandlink = ["jump", "a0"]
+        return [convert_v_type(set), convert_a_type(jumpandlink)]
+    elif instr[0] == "jumpandlinkval":
+        set = ["set", "a0", instr[1]]
+        jumpandlink = ["jump", "a0"]
+        return [convert_v_type(set), convert_a_type(jumpandlink)]
+    print(f"Did not match any known instructions: {instr}")
+    return ["something went wrong", "something went wrong"]
 
 
 def main(filename):
     file = open(filename, "r")
     text = file.read()
-    instructions = text.split("\n")
+    instructions = [inst for inst in text.split("\n") if inst != ""]
     a_type_inst = []
     v_type_inst = []
     all_translated = []
 
     for inst in instructions:
-        inst = inst.replace(" ", "")
+        if "jumpandlinkval" not in inst and "jumpval" not in inst:
+            inst = inst.replace(" ", "")
+        else:
+            all_translated.extend(convert_pseudo(inst.split(" ")))
+
         if inst.split("$")[0] in a_type:
             inst = inst.replace(",", "")
             a_type_inst.append(inst.split("$"))
@@ -112,36 +200,13 @@ def main(filename):
             v_type_inst.append(inst.split("$"))
             all_translated.append(convert_v_type(inst.split("$")))
         elif inst.split("$")[0] in pseudo:
-            pass
-        else:
+            all_translated.extend(convert_pseudo(inst.split("$")))
+        elif "jumpandlinkval" not in inst and "jumpval" not in inst:
             print(f"ERROR: Type cannot be identified for instruction: {inst.replace('$', ' $')}")
-    print(f'A-Types: {a_type_inst}')
-    print(f'V-Types: {v_type_inst}')
-    # a_type_translated = []
-    #
-    # for i, instr in enumerate(a_type_inst):
-    #     converted = [x if x not in a_type and x not in a_type_dict.keys() else a_type_dict[x] for x in instr]
-    #     a_type_translated.append(converted)
-    #     if instr[0] == "store":
-    #         converted.append(converted[2])
-    #         converted[2] = "0"
-    # a_type_translated = ['0x' + ''.join(x) for x in a_type_translated]
-    # print(f"Machine A-Types: {a_type_translated}")
-
-    # v_type_translated = []
-    # for instr in v_type_inst:
-    #     hex_string = str(hex(int(instr[2]))).replace("x", "").replace("0", "")
-    #     if len(hex_string) == 2:
-    #         pass
-    #     elif len(hex_string) == 1:
-    #         hex_string = "0" + hex_string
-    #     else:
-    #         print(f"ERROR: This is not length 1 or 2 in hex... :{hex_string}")
-    #     v_type_translated.append(f"0x7{a_type_dict[instr[1]]}{hex_string.upper()}")
-    # v_types_translated = [''.join(x) for x in v_type_translated]
-    # print(f"Machine V-Types: {v_types_translated}")
 
     print(f"Machine ALL: {all_translated}")
+    for inst in all_translated:
+        print(inst)
 
     file.close()
 

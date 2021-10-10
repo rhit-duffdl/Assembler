@@ -1,7 +1,31 @@
-add $v0, $sv0, $v0
-subtract $fa0, $fa1, $fa0
-set $v0, 2
-store $v1, $v0
-set $sv0, 30
-copy $fa1, $v0
-jump $v0
+add $v0, $v1, $sv0
+subtract $sv0, $sv1, $k0
+multiply $fr0, $fr1, $fa0
+divide $fa0, $fa1, $ra
+set $stack, 21
+and $stack, $ra, $zero
+or $global, $frame, $k0
+lessthan $k0, $fa0, $fa1
+greaterthan $v1, $fr0, $fr1
+jump $ra
+store $ra, $stack
+load $fr0, $ra
+brancheq $k0, $stack, $global
+jumpandlink $stack
+
+addval $ra, 21, $sv2
+subtractval $fr1, 15, $v0
+multiplyval $v0, 24, $sv0
+divideval $ra, 16, $stack
+orval $ra, 12, $fr1
+andval $sv2, 1, $fr1
+lessthanval $global, 10, $frame
+greaterthanval $fr0, 21, $fa0
+equaltoval $ra, 9, $fr0
+storeatval $ra, 2
+loadatval $frame, 9
+copy $sv0, $a0
+branchnoteq $fa0, $fr1, 32
+loadaddr $ra, 243
+jumpval 223
+jumpandlinkval 224
