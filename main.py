@@ -72,25 +72,23 @@ def convert_a_type(instr):
         converted.extend(["0", converted[1]])
         converted[1] = "0"
         return '0x' + ''.join(converted)
-        # What are we doing here
     elif instr[0] == "load":
         return '0x' + ''.join(converted) + "0"
     return '0x' + ''.join(converted)
 
 
 def convert_v_type(instr):
-    if instr[2] != "0" and instr[2] != 0:
-        hex_string = str(hex(int(instr[2]))).replace("x", "").replace("0", "")
-    else:
-        instr[2] = "0"
-        hex_string = "0"
+    instr = [inst.replace(",", "") for inst in instr]
+    hex_string = str(hex(int(instr[1]))).replace("x", "")
+    hex_string = hex_string[1::]
     if len(hex_string) == 2:
         pass
     elif len(hex_string) == 1:
         hex_string = "0" + hex_string
     else:
         print(f"ERROR: This is not length 1 or 2 in hex... :{hex_string}")
-    return f"0x7{a_type_dict[instr[1]]}{hex_string.upper()}"
+    hex_string = hex_string.upper()
+    return f"0x7{hex_string}{a_type_dict[instr[2].replace('$', '')]}"
 
 
 def convert_pseudo(instr):
@@ -173,7 +171,7 @@ def convert_pseudo(instr):
         set = ["set", "a0", instr[1]]
         jumpandlink = ["jump", "a0"]
         return [convert_v_type(set), convert_a_type(jumpandlink)]
-    print(f"Did not match any known instructions: {instr}")
+    print(f"Did not match any known pseudo instructions: {instr}")
     return ["something went wrong", "something went wrong"]
 
 
@@ -188,18 +186,17 @@ def main(filename_read, filename_write):
 
     for inst in instructions:
         if "jumpandlinkval" not in inst and "jumpval" not in inst:
-            inst = inst.replace(" ", "")
+            if "set" not in inst:
+                inst = inst.replace(" ", "")
         else:
             all_translated.extend(convert_pseudo(inst.split(" ")))
-
         if inst.split("$")[0] in a_type:
             inst = inst.replace(",", "")
             a_type_inst.append(inst.split("$"))
             all_translated.append(convert_a_type(inst.split("$")))
-        elif inst.split("$")[0] in v_type:
-            inst = inst.replace(",", "$")
-            v_type_inst.append(inst.split("$"))
-            all_translated.append(convert_v_type(inst.split("$")))
+        elif inst.split(" ")[0] in v_type:
+            v_type_inst.append(inst.split(" "))
+            all_translated.append(convert_v_type(inst.split(" ")))
         elif inst.split("$")[0] in pseudo:
             all_translated.extend(convert_pseudo(inst.split("$")))
         elif "jumpandlinkval" not in inst and "jumpval" not in inst:
@@ -211,10 +208,11 @@ def main(filename_read, filename_write):
         print(inst)
 
     file = open(filename_write, "w")
-    for instr in all_translated[0:len(all_translated)-1]:
+    for instr in all_translated[0:len(all_translated) - 1]:
         file.write(instr)
         file.write("\n")
     file.write(all_translated[-1])
+
 
 if __name__ == '__main__':
     main("lilak.txt", "translated.txt")
