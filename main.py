@@ -184,6 +184,7 @@ def main(filename_read, filename_write):
     all_translated = []
     file.close()
 
+
     for inst in instructions:
         if "jumpandlinkval" not in inst and "jumpval" not in inst:
             if "set" not in inst:
