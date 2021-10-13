@@ -78,8 +78,8 @@ def convert_a_type(instr):
 
 
 def convert_v_type(instr):
-    instr = [inst.replace(",", "") for inst in instr]
-    hex_string = str(hex(int(instr[1]))).replace("x", "")
+    instr = [str(inst).replace(",", "") for inst in instr]
+    hex_string = str(hex(int(instr[2]))).replace("x", "")
     hex_string = hex_string[1::]
     if len(hex_string) == 2:
         pass
@@ -88,7 +88,7 @@ def convert_v_type(instr):
     else:
         print(f"ERROR: This is not length 1 or 2 in hex... :{hex_string}")
     hex_string = hex_string.upper()
-    return f"0x7{hex_string}{a_type_dict[instr[2].replace('$', '')]}"
+    return f"0x7{hex_string}{a_type_dict[instr[1].replace('$', '')]}"
 
 
 def convert_pseudo(instr):
