@@ -1,1 +1,1 @@
-jumpandlink $v0
+jump $v0
