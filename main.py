@@ -62,24 +62,20 @@ def convert_a_type(instr):
     converted = [x if x not in a_type and x not in a_type_dict.keys() else a_type_dict[x] for x in instr]
     if instr[0] == "store":
         converted.append(converted[2])
-        converted[2] = "0"
+        converted[3] = "0"
         return '0x' + ''.join(converted)
     elif instr[0] == "jump":
-        converted.extend(["0", converted[1]])
-        converted[1] = "0"
-        return '0x' + ''.join(converted)
+        return '0x' + converted[0] + converted[1] + "00"
     elif instr[0] == "jumpandlink":
-        converted.extend(["0", converted[1]])
-        converted[1] = "0"
-        return '0x' + ''.join(converted)
+        return '0x' + converted[0] + converted[1] + "00"
     elif instr[0] == "load":
-        return '0x' + ''.join(converted) + "0"
+        return '0x' + converted[0] + converted[2] + "0" + converted[1]
     return '0x' + ''.join(converted)
 
 
 def convert_v_type(instr):
     instr = [str(inst).replace(",", "") for inst in instr]
-    hex_string = str(hex(int(instr[2]))).replace("x", "")
+    hex_string = str(hex(int(instr[1]))).replace("x", "")
     hex_string = hex_string[1::]
     if len(hex_string) == 2:
         pass
@@ -88,7 +84,7 @@ def convert_v_type(instr):
     else:
         print(f"ERROR: This is not length 1 or 2 in hex... :{hex_string}")
     hex_string = hex_string.upper()
-    return f"0x7{hex_string}{a_type_dict[instr[1].replace('$', '')]}"
+    return f"0x7{hex_string}{a_type_dict[instr[2].replace('$', '')]}"
 
 
 def convert_pseudo(instr):
