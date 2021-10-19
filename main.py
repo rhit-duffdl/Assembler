@@ -94,7 +94,7 @@ def convert_pseudo(instr):
         instr.append(instr[2])
         instr[2] = instr[1].split(",")[1]
         instr[1] = temp
-        set = ["set", "a0", instr[2]]
+        set = ["set", instr[2], "a0"]
 
     if instr[0] == "addval":
         add = ["add", instr[1], "a0", instr[3]]
@@ -126,13 +126,13 @@ def convert_pseudo(instr):
     elif instr[0] == "storeatval":
         instr.append(instr[1].split(",")[1])
         instr[1] = instr[1].split(",")[0]
-        set = ["set", "a0", instr[2]]
+        set = ["set", instr[2], "a0"]
         store = ["store", instr[1], "a0"]
         return [convert_v_type(set), convert_a_type(store)]
     elif instr[0] == "loadatval":
         instr.append(instr[1].split(",")[1])
         instr[1] = instr[1].split(",")[0]
-        set = ["set", "a0", instr[2]]
+        set = ["set", instr[2], "a0"]
         load = ["load", instr[1], "a0"]
         return [convert_v_type(set), convert_a_type(load)]
     elif instr[0] == "copy":
@@ -141,7 +141,7 @@ def convert_pseudo(instr):
     elif instr[0] == "branchnoteq":
         instr[2] = instr[3].split(",")[0]
         instr[3] = instr[3].split(",")[1]
-        set[2] = instr[3]
+        set[1] = str(instr[3])
         eqto = ["equalto", instr[1], instr[2], instr[1]]
         brancheq = ["brancheq", instr[1], "zero", "a0"]
         return [convert_v_type(set), convert_a_type(eqto), convert_a_type(brancheq)]
@@ -155,16 +155,16 @@ def convert_pseudo(instr):
             binnum = "0" * (immediate_length - len(binnum)) + binnum
         set1_num = binnum[0:int(immediate_length / 2)]
         set2_num = binnum[int(immediate_length / 2):immediate_length]
-        set1 = ["set", instr[1], int(set1_num, 2)]
-        set2 = ["set", "a0", int(set2_num, 2)]
+        set1 = ["set", int(set1_num, 2), instr[1]]
+        set2 = ["set", int(set2_num, 2), "a0"]
         and_ = ["and", instr[1], "a0", instr[1]]
         return [convert_v_type(set1), convert_v_type(set2), convert_a_type(and_)]
     elif instr[0] == "jumpval":
-        set = ["set", "a0", instr[1]]
+        set = ["set", instr[1], "a0"]
         jumpandlink = ["jump", "a0"]
         return [convert_v_type(set), convert_a_type(jumpandlink)]
     elif instr[0] == "jumpandlinkval":
-        set = ["set", "a0", instr[1]]
+        set = ["set", instr[1], "a0"]
         jumpandlink = ["jump", "a0"]
         return [convert_v_type(set), convert_a_type(jumpandlink)]
     print(f"Did not match any known pseudo instructions: {instr}")
