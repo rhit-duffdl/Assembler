@@ -159,11 +159,7 @@ def convert_pseudo(instr):
         set2 = ["set", int(set2_num, 2), "a0"]
         and_ = ["and", instr[1], "a0", instr[1]]
         return [convert_v_type(set1), convert_v_type(set2), convert_a_type(and_)]
-    elif instr[0] == "jumpval":
-        set = ["set", instr[1], "a0"]
-        jumpandlink = ["jump", "a0"]
-        return [convert_v_type(set), convert_a_type(jumpandlink)]
-    elif instr[0] == "jumpandlinkval":
+    elif instr[0] == "jumpval" or instr[0] == "jumpandlinkval":
         set = ["set", instr[1], "a0"]
         jumpandlink = ["jump", "a0"]
         return [convert_v_type(set), convert_a_type(jumpandlink)]

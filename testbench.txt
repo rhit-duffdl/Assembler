@@ -2,7 +2,7 @@ add $v0, $v1, $sv0
 subtract $sv0, $sv1, $k0
 multiply $fr0, $fr1, $fa0
 divide $fa0, $fa1, $ra
-set $stack, 21
+set 21, $stack
 and $stack, $ra, $zero
 or $global, $frame, $k0
 lessthan $k0, $fa0, $fa1
