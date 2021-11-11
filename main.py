@@ -1,9 +1,11 @@
 a_type = ["add", "and", "divide", "greaterthan", "lessthan", "or", "multiply", "subtract", "brancheq", "jump",
           "jumpandlink", "load", "store", "equalto"]
+
 v_type = ["set"]
 
 pseudo = ["addval", "andval", "branchnoteq", "copy", "divideval", "equaltoval", "greaterthanval",
           "lessthanval", "loadatval", "loadaddr", "orval", "multiplyval", "storeatval", "subtractval", "jumpval"]
+
 a_type_dict = {
     "add": "0",
     "and": "1",
@@ -69,7 +71,7 @@ def convert_a_type(instr):
     elif instr[0] == "jumpandlink":
         return '0x' + converted[0] + converted[1] + "00"
     elif instr[0] == "load":
-        return '0x' + converted[0] + converted[2] + "0" + converted[1]
+        return '0x' + converted[0] + converted[1] + "0" + converted[2]
     return '0x' + ''.join(converted)
 
 
@@ -133,7 +135,7 @@ def convert_pseudo(instr):
         instr.append(instr[1].split(",")[1])
         instr[1] = instr[1].split(",")[0]
         set = ["set", instr[2], "a0"]
-        load = ["load", instr[1], "a0"]
+        load = ["load", "a0", instr[1]]
         return [convert_v_type(set), convert_a_type(load)]
     elif instr[0] == "copy":
         add = ["add", instr[1], "zero", instr[3]]
